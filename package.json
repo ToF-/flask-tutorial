@@ -1,0 +1,18 @@
+{
+  "engines": {
+    "node": "15.14.0"
+  },
+  "name": "flask-tutorial-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "cypress run --spec cypress/e2e",
+    "cypress:open": "cypress open"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^13.7.1"
+  }
+}
