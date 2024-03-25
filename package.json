@@ -14,5 +14,9 @@
   "license": "ISC",
   "devDependencies": {
     "cypress": "^13.7.1"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.7",
+    "util": "^0.12.5"
   }
 }
