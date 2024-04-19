@@ -1,9 +1,11 @@
 from flask import (
-        Blueprint, flash, g, redirect, render_template, request, url_for
+        Blueprint, current_app, flash, g, redirect, render_template, request, url_for
         )
 from werkzeug.exceptions import abort
+from werkzeug.utils import secure_filename
 from flaskr.auth import login_required
 from flaskr.db import get_db
+import os
 
 bp = Blueprint('blog', __name__)
 
@@ -16,6 +18,48 @@ def index():
             ' ORDER BY created DESC'
             ).fetchall()
     return render_template('blog/index.html', posts = posts)
+
+ALLOWED_EXTENSIONS = { 'txt', 'md' }
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@bp.route('/upload', methods = ('GET', 'POST'))
+@login_required
+def upload():
+    print(request)
+    error = None
+    if request.method == 'POST':
+        title = request.form['title']
+        if not title:
+            error = 'Title is required.'
+        if error is not None:
+            flash(error)
+        else:
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+            if file and allowed_file(file.filename):
+                basedir = os.path.abspath(os.path.dirname(__file__))
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(basedir, current_app.config['UPLOAD_FOLDER'], filename))
+                blog_file = open(os.path.join(basedir, current_app.config['UPLOAD_FOLDER'], filename))
+                body = blog_file.read()
+                blog_file.close()
+                db = get_db()
+                db.execute(
+                        'INSERT INTO post (title, body, author_id)'
+                        ' VALUES (?, ?, ?)',
+                        (title, body, g.user['id'])
+                        )
+                db.commit()
+                return redirect(url_for('blog.index'))
+    return render_template('blog/upload.html')
 
 @bp.route('/create', methods = ('GET', 'POST'))
 @login_required

@@ -1,0 +1,16 @@
+
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}Upload a post{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+  <form method="post" enctype="multipart/form-data">
+    <label for="title">Title</label>
+    <input name="title" id="title"
+      value="{{ request.form['title']}}" required>
+    <input name="file" type="file">
+    <input type="submit" id="upload" value="Upload">
+  </form>
+{% endblock %}
